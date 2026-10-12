@@ -57,14 +57,15 @@ export default function App() {
         keyExtractor={(profile) => profile.id}
         ListHeaderComponent={<Text style={styles.brand}>Rabbit Habits</Text>}
         renderItem={({ item }) => <RabbitProfile rabbit={item.rabbit} pictureSize={pictureSize} />}
-        onScrollBeginDrag={() => { canLoadMore.current = true; }}
         onEndReached={() => {
-          if (canLoadMore.current) {
-            canLoadMore.current = false;
-            setProfileCount((count) => count + rabbits.length);
-          }
+          if (canLoadMore.current) return;
+          canLoadMore.current = true;
+          setProfileCount((count) => count + rabbits.length);
         }}
-        onEndReachedThreshold={0.5}
+        onContentSizeChange={() => {
+          canLoadMore.current = false;
+        }}
+        onEndReachedThreshold={1}
         showsVerticalScrollIndicator={false}
       />
     </View>
