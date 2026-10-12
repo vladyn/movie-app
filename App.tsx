@@ -49,7 +49,7 @@ export default function App() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <FlatList
         testID="rabbit-list"
         contentContainerStyle={styles.content}

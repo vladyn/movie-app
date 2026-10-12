@@ -20,12 +20,12 @@ test('starts with all three rabbits and their habits', async () => {
   expect(screen.getByText('Meet Pip')).toBeTruthy();
   expect(screen.getByText('Meet Mochi')).toBeTruthy();
   expect(screen.getByText('Meet Clover')).toBeTruthy();
-  expect(screen.getByLabelText('Pip the rabbit')).toBeTruthy();
-  expect(screen.getByLabelText('Mochi the rabbit')).toBeTruthy();
-  expect(screen.getByLabelText('Clover the rabbit')).toBeTruthy();
-  expect(screen.getByText('Nibble fresh greens')).toBeTruthy();
-  expect(screen.getByText('Explore the garden')).toBeTruthy();
-  expect(screen.getByText('Rest in a cozy corner')).toBeTruthy();
+  expect(screen.getAllByLabelText('Pip the rabbit')).toHaveLength(2);
+  expect(screen.getAllByLabelText('Mochi the rabbit')).toHaveLength(2);
+  expect(screen.getAllByLabelText('Clover the rabbit')).toHaveLength(2);
+  expect(screen.getAllByText('Nibble fresh greens')).toHaveLength(2);
+  expect(screen.getAllByText('Explore the garden')).toHaveLength(2);
+  expect(screen.getAllByText('Rest in a cozy corner')).toHaveLength(2);
   expect(screen.getAllByText('•')).toHaveLength(9);
   expect(screen.getByTestId('rabbit-list').props.data).toHaveLength(3);
 });
@@ -35,8 +35,8 @@ test('can show another rabbit when the random choice changes', async () => {
   await render(<App />);
 
   expect(screen.getByText('Meet Clover')).toBeTruthy();
-  expect(screen.getByLabelText('Clover the rabbit')).toBeTruthy();
-  expect(screen.getByText('Collect soft leaves')).toBeTruthy();
+  expect(screen.getAllByLabelText('Clover the rabbit')).toHaveLength(2);
+  expect(screen.getAllByText('Collect soft leaves')).toHaveLength(2);
   expect(screen.getByTestId('rabbit-list').props.data[0].rabbit.name).toBe('Clover');
 });
 
