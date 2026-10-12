@@ -30,6 +30,7 @@ yarn-debug.*
 yarn-error.*
 .DS_Store
 .idea/
+.junie/
 
 # BEADS runtime and temporary execution state
 .beads/beads.db
