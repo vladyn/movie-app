@@ -45,6 +45,8 @@ export default function App() {
     rabbit: rabbits[(firstRabbitIndex + index) % rabbits.length],
   }));
 
+  console.log(profiles);
+
   return (
     <View style={styles.screen}>
       <StatusBar style="dark" />
@@ -109,12 +111,10 @@ const styles = StyleSheet.create({
   },
   picture: {
     alignSelf: 'center',
-    borderRadius: 24,
     backgroundColor: '#dce8d7',
   },
   habitsCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 22,
     padding: 22,
     marginTop: 22,
   },
