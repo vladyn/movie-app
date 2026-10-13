@@ -1,6 +1,6 @@
-# Rabbit Habits
+# Movie Night
 
-A React Native starter built with Expo SDK 57 and TypeScript. The current screen shows all three mock rabbits with their pictures, names, and habits, starting from a random rabbit. Scrolling to the end loads another set of profiles, cycling through the local mock rabbits. Habit creation, reminders, and progress tracking are not implemented yet.
+Movie Night is an Expo SDK 57 React Native app that presents a scrolling feed of three fictional films. Each card shows a local poster, title, and description. The feed starts at a random film and appends another cycle of the same three films when you reach the end. Movie listings are local mock data; there is no catalog API or account system.
 
 ## Requirements
 
@@ -14,21 +14,21 @@ npm ci
 npm start
 ```
 
-Scan the QR code shown by Expo to open the app on a device. To launch a simulator directly, run `npm run ios` or `npm run android`. Follow the [Expo environment setup guide](https://docs.expo.dev/get-started/set-up-your-environment/) if a simulator is not installed. Expo manages the native project; generated `ios/` and `android/` folders are ignored by Git.
+Scan Expo's QR code to open the app on a device, or run `npm run ios` or `npm run android` for a simulator. See the [Expo environment setup guide](https://docs.expo.dev/get-started/set-up-your-environment/) if needed. Generated `ios/` and `android/` directories are ignored by Git.
 
 ## Project layout
 
 | Path | Purpose |
 | --- | --- |
-| `App.tsx` | Infinite scrolling rabbit profile screen and styles |
-| `src/data/rabbits.ts` | Mock rabbit profiles and habits |
-| `assets/rabbits/` | Local rabbit pictures for the mock profiles |
+| `App.tsx` | Movie feed, poster cards, responsive sizing, and load-more behavior |
+| `src/data/movies.ts` | Three fictional movie titles, descriptions, and poster references |
+| `assets/movies/` | Local movie poster images |
 | `index.ts` | Registers the root component with Expo |
-| `app.json` | App name and Expo configuration |
-| `__tests__/App.test.tsx` | Rabbit-screen component tests |
+| `app.json` | Expo app identity and configuration |
+| `__tests__/App.test.tsx` | Movie feed component tests |
 | `AGENTS.md`, `.metaswarm/` | Contributor and Metaswarm guidance |
 
-Place new feature modules under `src/` and keep related tests beside the code or in `__tests__/`. Add images and icons under `assets/` when needed.
+Add feature modules under `src/`, component tests in `__tests__/` or alongside their code, and images under `assets/`.
 
 ## Checks
 
@@ -38,8 +38,8 @@ npm test
 npm run test:coverage
 ```
 
-`typecheck` checks the Expo app with TypeScript strict mode. Jest and React Native Testing Library run the component test. Coverage must meet the 100% threshold in `.coverage-thresholds.json`; update Jest's `collectCoverageFrom` in `package.json` as application files are added.
+TypeScript uses strict checking. Jest with React Native Testing Library covers visible feed behavior, random starting position, poster sizing, and repeated loading. Coverage must meet the 100% threshold in `.coverage-thresholds.json`; keep Jest's `collectCoverageFrom` in `package.json` aligned when application code is added outside `App.tsx` and `src/`.
 
 ## Metaswarm workflow
 
-This repository includes a Metaswarm project profile and agent instructions in `AGENTS.md`. Use those instructions when planning and reviewing changes. Keep this README current as the app grows.
+This repository includes a Metaswarm project profile and contributor instructions in `AGENTS.md`. Follow those instructions when planning and reviewing changes, and keep this README current as the app grows.

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Rabbit Habits",
-    "slug": "rabbit-habits",
+    "name": "Movie Night",
+    "slug": "movie-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
