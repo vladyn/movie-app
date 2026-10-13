@@ -7,6 +7,12 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "409e2a00-da41-47b2-8676-456ccb5dfd49"
+      }
+    },
+    "owner": "vladyns-team"
   }
 }

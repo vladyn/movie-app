@@ -1,6 +1,6 @@
 # Rabbit Habits
 
-A React Native starter for a habit-tracking app, built with Expo SDK 57 and TypeScript. The app currently shows a welcome screen; habit creation, reminders, and progress tracking are not implemented yet.
+A React Native starter built with Expo SDK 57 and TypeScript. The current screen shows all three mock rabbits with their pictures, names, and habits, starting from a random rabbit. Scrolling to the end loads another set of profiles, cycling through the local mock rabbits. Habit creation, reminders, and progress tracking are not implemented yet.
 
 ## Requirements
 
@@ -20,10 +20,12 @@ Scan the QR code shown by Expo to open the app on a device. To launch a simulato
 
 | Path | Purpose |
 | --- | --- |
-| `App.tsx` | Current welcome screen and styles |
+| `App.tsx` | Infinite scrolling rabbit profile screen and styles |
+| `src/data/rabbits.ts` | Mock rabbit profiles and habits |
+| `assets/rabbits/` | Local rabbit pictures for the mock profiles |
 | `index.ts` | Registers the root component with Expo |
 | `app.json` | App name and Expo configuration |
-| `__tests__/App.test.tsx` | Welcome-screen component test |
+| `__tests__/App.test.tsx` | Rabbit-screen component tests |
 | `AGENTS.md`, `.metaswarm/` | Contributor and Metaswarm guidance |
 
 Place new feature modules under `src/` and keep related tests beside the code or in `__tests__/`. Add images and icons under `assets/` when needed.
