@@ -1,65 +1,83 @@
-import { useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { FlatList, Image, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { movies, type Movie } from './src/data/movies';
+import { searchMovies, type Episode, searchEpisodes, getEpisodeDetails, type Movie } from './src/services/movie-service';
 
-export function getPosterSize(viewportWidth: number, viewportHeight: number) {
-  const width = Math.floor(Math.max(0, Math.min(viewportWidth - 88, viewportHeight * 0.55 * 2 / 3, 360)));
-  return { width, height: Math.floor(width * 1.5) };
-}
-
-function MovieCard({ movie, posterSize }: { movie: Movie; posterSize: ReturnType<typeof getPosterSize> }) {
+function MovieCard({ episode }: { episode: Episode }) {
   return (
     <View style={styles.card}>
-      <Image
-        accessibilityLabel={`${movie.title} poster`}
-        source={movie.thumbnail}
-        style={[styles.poster, posterSize]}
-      />
-      <Text style={styles.movieTitle}>{movie.title}</Text>
-      <Text style={styles.description}>{movie.description}</Text>
+      <Image  accessibilityLabel={`${episode.Title} poster`}
+        source={episode.Poster}
+        style={styles.poster}
+        />
+      <Text style={styles.movieTitle}>{episode.Title}</Text>
+      <Text style={styles.details}>Episode {episode.Episode}</Text>
+      <Text style={styles.details}>Released: {episode.Released}</Text>
+      <Text style={styles.details}>IMDb rating: {episode.imdbRating}</Text>
+      <Text style={styles.details}>IMDb ID: {episode.imdbID}</Text>
     </View>
   );
 }
 
 export default function App() {
-  const { width, height } = useWindowDimensions();
-  const posterSize = getPosterSize(width, height);
-  const [firstMovieIndex] = useState(() => Math.floor(Math.random() * movies.length));
-  const [movieCount, setMovieCount] = useState(movies.length);
-  const canLoadMore = useRef(false);
-  const cards = Array.from({ length: movieCount }, (_, index) => {
-    const movie = movies[(firstMovieIndex + index) % movies.length];
-    return { key: `${movie.id}-${index}`, movie };
-  });
+  const [isHorizontal, setIsHorizontal] = useState(false);
+  const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [movie, setMovie] = useState<null | Movie>(null);
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  useEffect(() => {
+    Promise.all([
+      searchMovies('it crowd'),
+      searchEpisodes('it crowd'),
+    ])
+        .then(([movie, season]) => {
+          setMovie(movie);
+          setEpisodes(season.Episodes);
+          setLoadState('ready');
+        })
+        .catch(() => setLoadState('error'));
+  }, []);
 
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
+      <View style={styles.layoutControl}>
+        <Text style={styles.layoutLabel}>Horizontal</Text>
+        <Switch
+          accessibilityLabel="Horizontal"
+          value={isHorizontal}
+          onValueChange={setIsHorizontal}
+        />
+      </View>
       <FlatList
         testID="movie-list"
         contentContainerStyle={styles.content}
-        data={cards}
-        keyExtractor={(card) => card.key}
+        horizontal={isHorizontal}
+        data={episodes}
+        keyExtractor={(episode) => episode.imdbID}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.eyebrow}>TONIGHT'S PICKS</Text>
-            <Text style={styles.brand}>Movie Night</Text>
-            <Text style={styles.subtitle}>Stories worth staying up for.</Text>
+            <Text style={styles.eyebrow}>{movie?.Title}</Text>
+            <Text style={styles.brand}>{movie?.Year}</Text>
+            <Text style={styles.details}>IMDb ID: {movie?.imdbID}</Text>
+            <Text style={styles.details}>Poster: {movie?.Poster}</Text>
+            <Text style={styles.subtitle}>{movie?.Ratings}</Text>
           </View>
         }
-        renderItem={({ item }) => <MovieCard movie={item.movie} posterSize={posterSize} />}
-        onEndReached={() => {
-          if (canLoadMore.current) return;
-          canLoadMore.current = true;
-          setMovieCount((count) => count + movies.length);
-        }}
-        onContentSizeChange={() => {
-          canLoadMore.current = false;
-        }}
+        renderItem={({ item }) => <MovieCard episode={item} />}
         onEndReachedThreshold={1}
+        ListEmptyComponent={
+          <Text style={styles.details}>
+            {loadState === 'loading'
+              ? 'Loading episodes...'
+              : loadState === 'error'
+                ? 'Could not load episodes.'
+                : 'No episodes found.'}
+          </Text>
+        }
         showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
       />
     </View>
   );
@@ -81,50 +99,60 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   eyebrow: {
-    color: '#a8e9dc',
+    color: '#fda05c',
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 2.2,
   },
+  layoutControl: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 24,
+    paddingTop: 24,
+  },
+  layoutLabel: {
+    color: '#96dfff',
+    fontSize: 15,
+    marginRight: 12,
+  },
   brand: {
-    color: '#f7f8fb',
+    color: '#96dfff',
     fontSize: 36,
     fontWeight: '800',
     marginTop: 8,
   },
   subtitle: {
-    color: '#9da9bb',
+    color: '#739ddc',
     fontSize: 15,
     marginTop: 6,
   },
   card: {
     alignItems: 'center',
-    alignSelf: 'stretch',
-    backgroundColor: '#151c2a',
-    borderColor: '#283246',
-    borderRadius: 18,
+    backgroundColor: '#2d194e',
+    borderColor: '#875aca',
     borderWidth: 1,
     marginBottom: 20,
+    marginRight: 20,
     overflow: 'hidden',
     padding: 20,
-  },
-  poster: {
-    borderRadius: 12,
-    backgroundColor: '#283246',
+    width: 260,
   },
   movieTitle: {
-    alignSelf: 'stretch',
-    color: '#f7f8fb',
+    color: '#c12298',
     fontSize: 22,
     fontWeight: '700',
     lineHeight: 28,
-    marginTop: 18,
   },
-  description: {
-    alignSelf: 'stretch',
-    color: '#aab5c5',
+  details: {
+    color: '#bcdf88',
     fontSize: 15,
     lineHeight: 22,
     marginTop: 8,
   },
+  poster: {
+    width: '100%',
+    height: 300,
+    marginBottom: 16,
+  }
 });
