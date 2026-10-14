@@ -2,23 +2,23 @@
 
 ## Project Structure & Module Organization
 
-This is an Expo React Native app. `App.tsx` contains the starter screen, `index.ts` registers it, `app.json` holds Expo metadata, and `__tests__/` holds component tests. Add feature code under `src/` as the app grows; keep assets under `assets/` and document new top-level directories in the README.
+This is the Movie Night Expo React Native app. `App.tsx` renders the movie feed, `src/data/movies.ts` holds the three mock films, and `assets/movies/` holds their posters. `index.ts` registers the app, `app.json` holds Expo metadata, and `__tests__/` holds component tests. Add feature code under `src/` and document new top-level directories in the README.
 
 ## Build, Test, and Development Commands
 
-Run `npm install` once dependencies are available. Use `npm start` for Expo, or `npm run ios` and `npm run android` for simulators. Run `npm run typecheck`, `npm test`, and `npm run test:coverage` before a pull request. The app has no native build script yet.
+Run `npm ci` to install the locked dependencies. Use `npm start` for Expo, or `npm run ios` and `npm run android` for simulators. Run `npm run typecheck`, `npm test`, and `npm run test:coverage` before a pull request. The app has no native build script yet.
 
 ## Coding Style & Naming Conventions
 
-Use TypeScript with strict checking and two-space indentation, as in the starter files. Name React components in PascalCase (`HabitCard.tsx`), functions and variables in camelCase, and tests after the component (`App.test.tsx`). No formatter or linter is configured yet; add one with a shared configuration before enforcing its command.
+Use TypeScript with strict checking and two-space indentation, as in the starter files. Name React components in PascalCase (`MovieCard.tsx`), functions and variables in camelCase, and tests after the component (`App.test.tsx`). No formatter or linter is configured yet; add one with a shared configuration before enforcing its command.
 
 ## Testing Guidelines
 
-Jest with `jest-expo` and React Native Testing Library runs tests in `__tests__/`. Name tests `*.test.tsx` and describe visible behavior, such as `shows the Rabbit Habits starter screen`. Run `npm test` locally and `npm run test:coverage` for the 100% threshold in `.coverage-thresholds.json`. Expand Jest's `collectCoverageFrom` when adding source files.
+Jest with `jest-expo` and React Native Testing Library runs tests in `__tests__/`. Name tests `*.test.tsx` and describe visible behavior, such as `shows each movie title and description`. Run `npm test` locally and `npm run test:coverage` for the 100% threshold in `.coverage-thresholds.json`. Expand Jest's `collectCoverageFrom` when adding app code outside `App.tsx` and `src/`.
 
 ## Commit & Pull Request Guidelines
 
-This directory has no Git history, so no existing commit convention can be inferred. Use short, imperative commit subjects that describe the change, for example `Add habit creation form`. Pull requests should explain the purpose, summarize the main changes, include test results, and link a related issue when one exists. Include screenshots for visible interface changes.
+Recent history mixes plain subjects with conventional prefixes such as `feat:`. Use a short, imperative subject that names the change, for example `docs: describe movie feed`. Pull requests should explain the purpose, summarize the main changes, include test results, and link a related issue when one exists. Include screenshots for visible interface changes.
 
 ## metaswarm
 

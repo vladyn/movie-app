@@ -2,65 +2,58 @@ import { useRef, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { FlatList, Image, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { rabbits, type Rabbit } from './src/data/rabbits';
+import { movies, type Movie } from './src/data/movies';
 
-export function getPictureSize(viewportWidth: number, viewportHeight: number) {
-  return Math.floor(Math.max(0, Math.min(viewportWidth - 48, viewportHeight * 0.4, 360)));
+export function getPosterSize(viewportWidth: number, viewportHeight: number) {
+  const width = Math.floor(Math.max(0, Math.min(viewportWidth - 88, viewportHeight * 0.55 * 2 / 3, 360)));
+  return { width, height: Math.floor(width * 1.5) };
 }
 
-function RabbitProfile({ rabbit, pictureSize }: { rabbit: Rabbit; pictureSize: number }) {
+function MovieCard({ movie, posterSize }: { movie: Movie; posterSize: ReturnType<typeof getPosterSize> }) {
   return (
-    <View style={styles.profile}>
-      <Text style={styles.eyebrow}>YOUR LITTLE COMPANION</Text>
-      <Text style={styles.title}>Meet {rabbit.name}</Text>
-      <Text style={styles.subtitle}>Small routines, happy hops.</Text>
-
+    <View style={styles.card}>
       <Image
-        accessibilityLabel={`${rabbit.name} the rabbit`}
-        source={rabbit.picture}
-        style={[styles.picture, { width: pictureSize, height: pictureSize }]}
+        accessibilityLabel={`${movie.title} poster`}
+        source={movie.thumbnail}
+        style={[styles.poster, posterSize]}
       />
-
-      <View style={styles.habitsCard}>
-        <Text style={styles.habitsTitle}>{rabbit.name}'s habits</Text>
-        {rabbit.habits.map((habit) => (
-          <View key={habit} style={styles.habitRow}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.habitText}>{habit}</Text>
-          </View>
-        ))}
-      </View>
+      <Text style={styles.movieTitle}>{movie.title}</Text>
+      <Text style={styles.description}>{movie.description}</Text>
     </View>
   );
 }
 
 export default function App() {
   const { width, height } = useWindowDimensions();
-  const pictureSize = getPictureSize(width, height);
-  const [firstRabbitIndex] = useState(() => Math.floor(Math.random() * rabbits.length));
-  const [profileCount, setProfileCount] = useState(rabbits.length);
+  const posterSize = getPosterSize(width, height);
+  const [firstMovieIndex] = useState(() => Math.floor(Math.random() * movies.length));
+  const [movieCount, setMovieCount] = useState(movies.length);
   const canLoadMore = useRef(false);
-  const profiles = Array.from({ length: profileCount }, (_, index) => ({
-    id: rabbits[(firstRabbitIndex + index) % rabbits.length].id.toString(),
-    rabbit: rabbits[(firstRabbitIndex + index) % rabbits.length],
-  }));
-
-  console.log(profiles);
+  const cards = Array.from({ length: movieCount }, (_, index) => {
+    const movie = movies[(firstMovieIndex + index) % movies.length];
+    return { key: `${movie.id}-${index}`, movie };
+  });
 
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
       <FlatList
-        testID="rabbit-list"
+        testID="movie-list"
         contentContainerStyle={styles.content}
-        data={profiles}
-        keyExtractor={(profile) => profile.id}
-        ListHeaderComponent={<Text style={styles.brand}>Rabbit Habits</Text>}
-        renderItem={({ item }) => <RabbitProfile rabbit={item.rabbit} pictureSize={pictureSize} />}
+        data={cards}
+        keyExtractor={(card) => card.key}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Text style={styles.eyebrow}>TONIGHT'S PICKS</Text>
+            <Text style={styles.brand}>Movie Night</Text>
+            <Text style={styles.subtitle}>Stories worth staying up for.</Text>
+          </View>
+        }
+        renderItem={({ item }) => <MovieCard movie={item.movie} posterSize={posterSize} />}
         onEndReached={() => {
           if (canLoadMore.current) return;
           canLoadMore.current = true;
-          setProfileCount((count) => count + rabbits.length);
+          setMovieCount((count) => count + movies.length);
         }}
         onContentSizeChange={() => {
           canLoadMore.current = false;
@@ -75,71 +68,63 @@ export default function App() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#f5f6ee',
+    backgroundColor: '#090d16',
   },
   content: {
+    alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 68,
+    paddingTop: 64,
     paddingBottom: 36,
   },
-  brand: {
-    color: '#315742',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.2,
-    marginBottom: 40,
-  },
-  profile: {
-    marginBottom: 36,
+  header: {
+    alignSelf: 'stretch',
+    marginBottom: 28,
   },
   eyebrow: {
-    color: '#71977b',
+    color: '#a8e9dc',
     fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 2,
+    fontWeight: '700',
+    letterSpacing: 2.2,
   },
-  title: {
-    color: '#243c2d',
-    fontSize: 38,
+  brand: {
+    color: '#f7f8fb',
+    fontSize: 36,
     fontWeight: '800',
     marginTop: 8,
   },
   subtitle: {
-    color: '#667d6d',
-    fontSize: 16,
+    color: '#9da9bb',
+    fontSize: 15,
     marginTop: 6,
-    marginBottom: 24,
   },
-  picture: {
-    alignSelf: 'center',
-    backgroundColor: '#dce8d7',
+  card: {
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    backgroundColor: '#151c2a',
+    borderColor: '#283246',
+    borderRadius: 18,
+    borderWidth: 1,
+    marginBottom: 20,
+    overflow: 'hidden',
+    padding: 20,
   },
-  habitsCard: {
-    backgroundColor: '#ffffff',
-    padding: 22,
-    marginTop: 22,
+  poster: {
+    borderRadius: 12,
+    backgroundColor: '#283246',
   },
-  habitsTitle: {
-    color: '#243c2d',
-    fontSize: 21,
-    fontWeight: '800',
-    marginBottom: 14,
+  movieTitle: {
+    alignSelf: 'stretch',
+    color: '#f7f8fb',
+    fontSize: 22,
+    fontWeight: '700',
+    lineHeight: 28,
+    marginTop: 18,
   },
-  habitRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: 10,
-  },
-  bullet: {
-    color: '#6b9b73',
-    fontSize: 24,
-    lineHeight: 24,
-    marginRight: 12,
-  },
-  habitText: {
-    color: '#405847',
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 24,
+  description: {
+    alignSelf: 'stretch',
+    color: '#aab5c5',
+    fontSize: 15,
+    lineHeight: 22,
+    marginTop: 8,
   },
 });
