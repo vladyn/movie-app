@@ -1,10 +1,17 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Episode } from '../services/movie-service';
 
-export function MovieCard({ episode }: { episode: Episode }) {
-  return (
-    <View style={styles.card}>
+type MovieCardProps = {
+  episode: Episode;
+  onPress?: () => void;
+  width?: number;
+  height?: number;
+};
+
+export function MovieCard({ episode, onPress, width = 290, height }: MovieCardProps) {
+  const content = (
+    <>
       <Image
         accessibilityLabel={`${episode.Title} poster`}
         source={{ uri: episode.Poster }}
@@ -14,7 +21,15 @@ export function MovieCard({ episode }: { episode: Episode }) {
       <Text style={styles.details}>Episode {episode.Episode}</Text>
       <Text style={styles.details}>Released: {episode.Released}</Text>
       <Text style={styles.details}>IMDb rating: {episode.imdbRating}</Text>
-    </View>
+    </>
+  );
+
+  return onPress ? (
+    <Pressable accessibilityRole="button" style={[styles.card, { width, height }]} onPress={onPress}>
+      {content}
+    </Pressable>
+  ) : (
+    <View style={[styles.card, { width, height }]}>{content}</View>
   );
 }
 
@@ -28,7 +43,6 @@ const styles = StyleSheet.create({
     marginRight: 20,
     overflow: 'hidden',
     padding: 20,
-    width: 260,
   },
   movieTitle: {
     color: '#c12298',
@@ -45,6 +59,7 @@ const styles = StyleSheet.create({
   poster: {
     width: '100%',
     height: 300,
+    flexShrink: 1,
     marginBottom: 16,
   },
 });

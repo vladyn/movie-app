@@ -20,9 +20,11 @@ Scan Expo's QR code to open the app on a device, or run `npm run ios` or `npm ru
 
 | Path | Purpose |
 | --- | --- |
-| `App.tsx` | Episode feed and vertical or horizontal layout switch |
+| `App.tsx` | Root navigator and screen registration |
 | `src/services/movie-service.ts` | OMDb season and episode requests |
-| `src/components/` | Reusable UI components |
+| `src/components/home-screen.tsx` | Episode feed, data loading, and layout switch |
+| `src/components/movie-card.tsx` | Episode card UI |
+| `src/components/episode.tsx` | Episode details screen |
 | `index.ts` | Registers the root component with Expo |
 | `app.json` | Expo app identity and configuration |
 | `__tests__/` | Episode feed and service tests |
