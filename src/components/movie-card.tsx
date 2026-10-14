@@ -5,11 +5,12 @@ import type { Episode } from '../services/movie-service';
 type MovieCardProps = {
   episode: Episode;
   onPress?: () => void;
+  showEpisodeDetails?: boolean;
   width?: number;
   height?: number;
 };
 
-export function MovieCard({ episode, onPress, width = 290, height }: MovieCardProps) {
+export function MovieCard({ episode, onPress, showEpisodeDetails = false, width = 290, height = 560 }: MovieCardProps) {
   const content = (
     <>
       <Image
@@ -18,9 +19,20 @@ export function MovieCard({ episode, onPress, width = 290, height }: MovieCardPr
         style={styles.poster}
       />
       <Text style={styles.movieTitle}>{episode.Title}</Text>
-      <Text style={styles.details}>Episode {episode.Episode}</Text>
+      <Text style={styles.details}>Season {episode.Season}</Text>
       <Text style={styles.details}>Released: {episode.Released}</Text>
       <Text style={styles.details}>IMDb rating: {episode.imdbRating}</Text>
+      {showEpisodeDetails && (
+        <>
+          <Text style={styles.details}>Episode Details:</Text>
+          <Text style={styles.details}>Episode: {episode.Episode}</Text>
+          <Text style={styles.details}>Director: {episode.Director}</Text>
+          <Text style={styles.details}>Writer: {episode.Writer}</Text>
+          <Text style={styles.details}>Actors: {episode.Actors}</Text>
+          <Text style={styles.details}>Plot: {episode.Plot}</Text>
+          <Text style={styles.details}>IMDb ID: {episode.imdbID}</Text>
+        </>
+      )}
     </>
   );
 
@@ -57,8 +69,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   poster: {
-    width: '100%',
+    width: 250,
     height: 300,
+    resizeMode: 'cover',
     flexShrink: 1,
     marginBottom: 16,
   },

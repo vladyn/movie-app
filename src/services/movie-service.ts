@@ -1,18 +1,5 @@
-// This file contains the functions to fetch data from the OMDB API.
-// the result to display will be only the IT Crowd movie series.
-//https://www.omdbapi.com/?t=it%20crowd&season=1&apikey=d425abd7
-
 const API_KEY = 'd425abd7';
 const BASE_URL = 'https://www.omdbapi.com/';
-
-export type Episode = {
-    Title: string;
-    Released: string;
-    Episode: string;
-    imdbRating: string;
-    imdbID: string;
-    Poster: string;
-};
 
 export type SeasonResponse = {
     Title: string;
@@ -21,7 +8,7 @@ export type SeasonResponse = {
     Episodes: Episode[];
 };
 
-export type MovieResponse = {
+type TitleDetails = {
     Title: string;
     Year: string;
     Rated: string;
@@ -41,11 +28,26 @@ export type MovieResponse = {
     imdbRating: string;
     imdbVotes: string;
     imdbID: string;
-    Type: 'series';
-    totalSeasons: string;
 };
 
-export const searchMovies = async (title: string): Promise<MovieResponse> => {
+export type MovieResponse = TitleDetails & {
+    Season: string;
+    Episode: string;
+    seriesID: string;
+    Type: 'episode';
+    Response: 'True';
+};
+
+export type SeriesResponse = TitleDetails & {
+    Type: 'series';
+    totalSeasons: string;
+    Response: 'True';
+};
+
+export type Episode = Pick<MovieResponse, 'Title' | 'Released' | 'Episode' | 'imdbRating' | 'imdbID'> &
+    Partial<Pick<MovieResponse, 'Poster' | 'Season' | 'Director' | 'Writer' | 'Actors' | 'Plot'>>;
+
+export const searchMovies = async (title: string): Promise<SeriesResponse> => {
     const response = await fetch(`${BASE_URL}?t=${title}&apikey=${API_KEY}`);
     if(!response.ok) {
         throw new Error('Failed to fetch movie data');
@@ -61,7 +63,7 @@ export const searchEpisodes = async (title: string): Promise<SeasonResponse> => 
     return await response.json();
 }
 
-export const getEpisodeDetails = async (imdbID: string): Promise<Episode> => {
+export const getEpisodeDetails = async (imdbID: string): Promise<MovieResponse> => {
     const response = await fetch(`${BASE_URL}?i=${imdbID}&apikey=${API_KEY}`);
     if(!response.ok) {
         throw new Error('Failed to fetch episode details');

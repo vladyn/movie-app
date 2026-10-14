@@ -18,7 +18,7 @@ export const EpisodeScreen = ({ route }: { route: { params: { episode: Episode }
 
   return (
     <View style={styles.container}>
-        <MovieCard episode={route.params.episode} width={360} height={600} />
+        <MovieCard episode={route.params.episode} showEpisodeDetails width={360} height={600} />
         <Button title={"Back"} onPress={() => navigation.goBack()} />
     </View>
   );

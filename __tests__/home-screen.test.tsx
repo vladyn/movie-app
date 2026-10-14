@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { HomeScreen } from '../src/components/home-screen';
-import { getEpisodeDetails, searchEpisodes, searchMovies, type Episode, type MovieResponse, type SeasonResponse } from '../src/services/movie-service';
+import { getEpisodeDetails, searchEpisodes, searchMovies, type Episode, type MovieResponse, type SeasonResponse, type SeriesResponse } from '../src/services/movie-service';
 
 const mockNavigate = jest.fn();
 
@@ -41,13 +41,45 @@ const season: SeasonResponse = {
   Episodes: episodes,
 };
 
+const detailBase: MovieResponse = {
+  Title: 'Yesterday\'s Jam',
+  Year: '2006',
+  Rated: 'TV-14',
+  Released: '2006-02-03',
+  Season: '1',
+  Episode: '1',
+  Runtime: '25 min',
+  Genre: 'Comedy',
+  Director: 'Graham Linehan',
+  Writer: 'Graham Linehan',
+  Actors: "Chris O'Dowd, Richard Ayoade, Katherine Parkinson",
+  Plot: 'Episode plot',
+  Language: 'English',
+  Country: 'United Kingdom',
+  Awards: 'N/A',
+  Poster: 'https://example.com/episode-1.jpg',
+  Ratings: [{ Source: 'Internet Movie Database', Value: '8.2/10' }],
+  Metascore: 'N/A',
+  imdbRating: '8.2',
+  imdbVotes: '2724',
+  imdbID: 'tt0609857',
+  seriesID: 'tt0487831',
+  Type: 'episode',
+  Response: 'True',
+};
+
+const episodeDetails: MovieResponse[] = episodes.map((episode) => ({
+  ...detailBase,
+  ...episode,
+}));
+
 const movie = {
   Title: 'The IT Crowd',
   Year: '2006–2013',
   imdbID: 'tt0487831',
   Poster: 'https://example.com/series.jpg',
   imdbRating: '8.5',
-} as MovieResponse;
+} as SeriesResponse;
 
 const searchMoviesMock = searchMovies as jest.MockedFunction<typeof searchMovies>;
 const searchEpisodesMock = searchEpisodes as jest.MockedFunction<typeof searchEpisodes>;
@@ -58,7 +90,7 @@ beforeEach(() => {
   searchMoviesMock.mockReset();
   searchEpisodesMock.mockReset();
   getEpisodeDetailsMock.mockReset();
-  getEpisodeDetailsMock.mockImplementation(async (imdbID) => episodes.find((episode) => episode.imdbID === imdbID)!);
+  getEpisodeDetailsMock.mockImplementation(async (imdbID) => episodeDetails.find((episode) => episode.imdbID === imdbID)!);
 });
 
 test('loads and displays episode fields from the season service', async () => {
@@ -71,20 +103,20 @@ test('loads and displays episode fields from the season service', async () => {
   expect(getEpisodeDetailsMock).toHaveBeenCalledTimes(2);
   await waitFor(() => expect(screen.getByText('Yesterday\'s Jam')).toBeTruthy());
   expect(screen.getByText('Calamity Jen')).toBeTruthy();
-  expect(screen.getByText('Episode 1')).toBeTruthy();
+  expect(screen.getAllByText('Season 1')).toHaveLength(2);
   expect(screen.getByText('Released: 2006-02-03')).toBeTruthy();
   expect(screen.getByText('IMDb rating: 8.2')).toBeTruthy();
-  expect(screen.getByTestId('movie-list').props.data).toEqual(episodes);
+  expect(screen.getByTestId('movie-list').props.data).toEqual(episodeDetails);
 
   fireEvent.press(screen.getByRole('button', { name: /Yesterday's Jam/ }));
-  expect(mockNavigate).toHaveBeenCalledWith('Episode', { episode: episodes[0] });
+  expect(mockNavigate).toHaveBeenCalledWith('Episode', { episode: episodeDetails[0] });
 });
 
 test('uses episode details for poster and rating', async () => {
   searchMoviesMock.mockResolvedValue(movie);
   searchEpisodesMock.mockResolvedValue(season);
   getEpisodeDetailsMock.mockImplementation(async (imdbID) => ({
-    ...episodes.find((episode) => episode.imdbID === imdbID)!,
+    ...episodeDetails.find((episode) => episode.imdbID === imdbID)!,
     Poster: `https://example.com/${imdbID}.jpg`,
     imdbRating: '9.0',
   }));
@@ -102,14 +134,17 @@ test('keeps season data when one episode detail request fails', async () => {
   searchEpisodesMock.mockResolvedValue(season);
   getEpisodeDetailsMock.mockImplementation(async (imdbID) => {
     if (imdbID === 'tt0609857') throw new Error('Details unavailable');
-    return episodes[1];
+    return episodeDetails[1];
   });
 
   await render(<HomeScreen />);
 
   await waitFor(() => expect(screen.getByText('Yesterday\'s Jam')).toBeTruthy());
   expect(screen.getByText('IMDb rating: 8.2')).toBeTruthy();
-  expect(screen.getByTestId('movie-list').props.data).toEqual(episodes);
+  expect(screen.getByTestId('movie-list').props.data).toEqual([
+    { ...episodes[0], Season: '1' },
+    episodeDetails[1],
+  ]);
 });
 
 test('shows loading while the season request is pending', async () => {

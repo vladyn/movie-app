@@ -10,7 +10,7 @@ import {
   searchMovies,
   searchEpisodes,
   type Episode,
-  type MovieResponse,
+  type SeriesResponse,
   getEpisodeDetails
 } from '../services/movie-service';
 
@@ -23,7 +23,7 @@ export function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [isHorizontal, setIsHorizontal] = useState(false);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [movie, setMovie] = useState<null | MovieResponse>(null);
+  const [movie, setMovie] = useState<null | SeriesResponse>(null);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
 
   useEffect(() => {
@@ -37,16 +37,17 @@ export function HomeScreen() {
         ]);
 
         const episodes = await Promise.all(
+            // Get each episode's details, because of the missing poster image. Poster is only available in the episode details, not in the season response.
+            // We need the poster to construct the slider
             season.Episodes.map(async (episode) => {
               try {
                 const details = await getEpisodeDetails(episode.imdbID);
                 return {
                   ...episode,
-                  Poster: details.Poster,
-                  imdbRating: details.imdbRating,
+                  ...details,
                 };
               } catch {
-                return episode; // Keep the season data if one detail request fails.
+                return { ...episode, Season: season.Season }; // Keep the season data if one detail request fails.
               }
             }),
         );
@@ -80,7 +81,7 @@ export function HomeScreen() {
         contentContainerStyle={styles.content}
         horizontal={isHorizontal}
         data={episodes}
-        keyExtractor={(episode) => episode.imdbID}
+        keyExtractor={( episode) => episode.imdbID }
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.eyebrow}>{movie?.Title}</Text>
