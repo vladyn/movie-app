@@ -1,62 +1,103 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
-import App, { getPosterSize } from '../App';
+import App from '../App';
+import { searchEpisodes, searchMovies, type Episode, type MovieResponse, type SeasonResponse } from '../src/services/movie-service';
 
-afterEach(() => {
-  jest.restoreAllMocks();
+jest.mock('../src/services/movie-service', () => ({
+  searchMovies: jest.fn(),
+  searchEpisodes: jest.fn(),
+}));
+
+const episodes: Episode[] = [
+  {
+    Title: 'Yesterday\'s Jam',
+    Released: '2006-02-03',
+    Episode: '1',
+    imdbRating: '8.2',
+    imdbID: 'tt0609857',
+    Poster: 'https://example.com/episode-1.jpg',
+  },
+  {
+    Title: 'Calamity Jen',
+    Released: '2006-02-10',
+    Episode: '2',
+    imdbRating: '8.1',
+    imdbID: 'tt0609856',
+    Poster: 'https://example.com/episode-2.jpg',
+  },
+];
+
+const season: SeasonResponse = {
+  Title: 'The IT Crowd',
+  Season: '1',
+  totalSeasons: '4',
+  Episodes: episodes,
+};
+
+const movie = {
+  Title: 'The IT Crowd',
+  Year: '2006–2013',
+  imdbID: 'tt0487831',
+  Poster: 'https://example.com/series.jpg',
+  imdbRating: '8.5',
+} as MovieResponse;
+
+const searchMoviesMock = searchMovies as jest.MockedFunction<typeof searchMovies>;
+const searchEpisodesMock = searchEpisodes as jest.MockedFunction<typeof searchEpisodes>;
+
+beforeEach(() => {
+  searchMoviesMock.mockReset();
+  searchEpisodesMock.mockReset();
 });
 
-test('keeps posters at a portrait aspect ratio within each viewport', () => {
-  expect(getPosterSize(320, 568)).toEqual({ width: 208, height: 312 });
-  expect(getPosterSize(390, 844)).toEqual({ width: 302, height: 453 });
-  expect(getPosterSize(1200, 800)).toEqual({ width: 293, height: 439 });
-  expect(getPosterSize(0, 0)).toEqual({ width: 0, height: 0 });
-});
-
-test('starts with three movies, their posters, and their descriptions', async () => {
-  jest.spyOn(Math, 'random').mockReturnValue(0);
+test('loads and displays episode fields from the season service', async () => {
+  searchMoviesMock.mockResolvedValue(movie);
+  searchEpisodesMock.mockResolvedValue(season);
   await render(<App />);
 
-  expect(screen.getByText('Movie Night')).toBeTruthy();
-  expect(screen.getByText('The Last Observatory')).toBeTruthy();
-  expect(screen.getByText('Midnight Current')).toBeTruthy();
-  expect(screen.getByText('The Glass Garden')).toBeTruthy();
-  expect(screen.getAllByLabelText('The Last Observatory poster')).toHaveLength(1);
-  expect(screen.getAllByLabelText('Midnight Current poster')).toHaveLength(1);
-  expect(screen.getAllByLabelText('The Glass Garden poster')).toHaveLength(1);
-  expect(screen.getAllByText('A lone astronomer discovers a signal hidden in the northern lights.')).toHaveLength(1);
-  expect(screen.getAllByText('A night voyage follows a glowing current toward a forgotten shore.')).toHaveLength(1);
-  expect(screen.getAllByText('An abandoned greenhouse holds the clues to a family secret.')).toHaveLength(1);
-  expect(screen.getByTestId('movie-list').props.data).toHaveLength(3);
+  expect(searchMoviesMock).toHaveBeenCalledWith('it crowd');
+  expect(searchEpisodesMock).toHaveBeenCalledWith('it crowd');
+  await waitFor(() => expect(screen.getByText('Yesterday\'s Jam')).toBeTruthy());
+  expect(screen.getByText('Calamity Jen')).toBeTruthy();
+  expect(screen.getByText('Episode 1')).toBeTruthy();
+  expect(screen.getByText('Released: 2006-02-03')).toBeTruthy();
+  expect(screen.getByText('IMDb rating: 8.2')).toBeTruthy();
+  expect(screen.getByTestId('movie-list').props.data).toEqual(episodes);
 });
 
-test('rotates the first movie when the random choice changes', async () => {
-  jest.spyOn(Math, 'random').mockReturnValue(0.99);
+test('shows loading while the season request is pending', async () => {
+  searchMoviesMock.mockImplementation(() => new Promise(() => {}));
+  searchEpisodesMock.mockImplementation(() => new Promise(() => {}));
   await render(<App />);
 
-  expect(screen.getByTestId('movie-list').props.data[0].movie.title).toBe('The Glass Garden');
-  expect(screen.getAllByLabelText('The Glass Garden poster')).toHaveLength(1);
+  expect(screen.getByText('Loading episodes...')).toBeTruthy();
 });
 
-test('loads more movie cards with distinct keys after each content update', async () => {
-  jest.spyOn(Math, 'random').mockReturnValue(0);
+test('shows an error when the season request fails', async () => {
+  searchMoviesMock.mockResolvedValue(movie);
+  searchEpisodesMock.mockRejectedValue(new Error('Network unavailable'));
   await render(<App />);
 
-  const list = screen.getByTestId('movie-list');
-  await fireEvent(list, 'endReached');
-  expect(screen.getByTestId('movie-list').props.data).toHaveLength(6);
+  await waitFor(() => expect(screen.getByText('Could not load episodes.')).toBeTruthy());
+});
 
-  await fireEvent(screen.getByTestId('movie-list'), 'endReached');
-  expect(screen.getByTestId('movie-list').props.data).toHaveLength(6);
+test('shows an empty message when the season has no episodes', async () => {
+  searchMoviesMock.mockResolvedValue(movie);
+  searchEpisodesMock.mockResolvedValue({ ...season, Episodes: [] });
+  await render(<App />);
 
-  await fireEvent(screen.getByTestId('movie-list'), 'contentSizeChange');
-  await fireEvent(screen.getByTestId('movie-list'), 'endReached');
-  const data = screen.getByTestId('movie-list').props.data;
-  expect(data).toHaveLength(9);
-  expect(new Set(data.map((item: { key: string }) => item.key)).size).toBe(9);
-  expect(data.map((item: { movie: { title: string } }) => item.movie.title)).toEqual([
-    'The Last Observatory', 'Midnight Current', 'The Glass Garden',
-    'The Last Observatory', 'Midnight Current', 'The Glass Garden',
-    'The Last Observatory', 'Midnight Current', 'The Glass Garden',
-  ]);
+  await waitFor(() => expect(screen.getByText('No episodes found.')).toBeTruthy());
+});
+
+test('switches the episode list between vertical and horizontal layouts', async () => {
+  searchMoviesMock.mockResolvedValue(movie);
+  searchEpisodesMock.mockResolvedValue(season);
+  await render(<App />);
+  await waitFor(() => expect(screen.getByText('Yesterday\'s Jam')).toBeTruthy());
+
+  expect(screen.getByTestId('movie-list').props.horizontal).toBe(false);
+  await fireEvent(screen.getByRole('switch', { name: 'Horizontal' }), 'valueChange', true);
+  expect(screen.getByTestId('movie-list').props.horizontal).toBe(true);
+  await fireEvent(screen.getByRole('switch', { name: 'Horizontal' }), 'valueChange', false);
+  expect(screen.getByTestId('movie-list').props.horizontal).toBe(false);
 });
