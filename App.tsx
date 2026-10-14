@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { FlatList, Image, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { MovieCard } from './src/components/movie-card';
+
 import {
   searchMovies,
   searchEpisodes,
@@ -9,21 +11,6 @@ import {
   type MovieResponse,
   getEpisodeDetails
 } from './src/services/movie-service';
-
-function MovieCard({ episode }: { episode: Episode }) {
-  return (
-    <View style={styles.card}>
-      <Image  accessibilityLabel={`${episode.Title} poster`}
-        source={{ uri: episode.Poster }}
-        style={styles.poster}
-        />
-      <Text style={styles.movieTitle}>{episode.Title}</Text>
-      <Text style={styles.details}>Episode {episode.Episode}</Text>
-      <Text style={styles.details}>Released: {episode.Released}</Text>
-      <Text style={styles.details}>IMDb rating: {episode.imdbRating}</Text>
-    </View>
-  );
-}
 
 export default function App() {
   const [isHorizontal, setIsHorizontal] = useState(false);
@@ -156,23 +143,6 @@ const styles = StyleSheet.create({
     color: '#739ddc',
     fontSize: 15,
     marginTop: 6,
-  },
-  card: {
-    alignItems: 'center',
-    backgroundColor: '#2d194e',
-    borderColor: '#875aca',
-    borderWidth: 1,
-    marginBottom: 20,
-    marginRight: 20,
-    overflow: 'hidden',
-    padding: 20,
-    width: 260,
-  },
-  movieTitle: {
-    color: '#c12298',
-    fontSize: 22,
-    fontWeight: '700',
-    lineHeight: 28,
   },
   details: {
     color: '#bcdf88',
