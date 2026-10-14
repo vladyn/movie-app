@@ -2,20 +2,25 @@ import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { FlatList, Image, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { searchMovies, type Episode, searchEpisodes, getEpisodeDetails, type Movie } from './src/services/movie-service';
+import {
+  searchMovies,
+  searchEpisodes,
+  type Episode,
+  type MovieResponse,
+  getEpisodeDetails
+} from './src/services/movie-service';
 
 function MovieCard({ episode }: { episode: Episode }) {
   return (
     <View style={styles.card}>
       <Image  accessibilityLabel={`${episode.Title} poster`}
-        source={episode.Poster}
+        source={{ uri: episode.Poster }}
         style={styles.poster}
         />
       <Text style={styles.movieTitle}>{episode.Title}</Text>
       <Text style={styles.details}>Episode {episode.Episode}</Text>
       <Text style={styles.details}>Released: {episode.Released}</Text>
       <Text style={styles.details}>IMDb rating: {episode.imdbRating}</Text>
-      <Text style={styles.details}>IMDb ID: {episode.imdbID}</Text>
     </View>
   );
 }
@@ -23,20 +28,45 @@ function MovieCard({ episode }: { episode: Episode }) {
 export default function App() {
   const [isHorizontal, setIsHorizontal] = useState(false);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [movie, setMovie] = useState<null | Movie>(null);
+  const [movie, setMovie] = useState<null | MovieResponse>(null);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
 
   useEffect(() => {
-    Promise.all([
-      searchMovies('it crowd'),
-      searchEpisodes('it crowd'),
-    ])
-        .then(([movie, season]) => {
-          setMovie(movie);
-          setEpisodes(season.Episodes);
-          setLoadState('ready');
-        })
-        .catch(() => setLoadState('error'));
+    let active = true;
+
+    async function load() {
+      try {
+        const [movie, season] = await Promise.all([
+          searchMovies('it crowd'),
+          searchEpisodes('it crowd'),
+        ]);
+
+        const episodes = await Promise.all(
+            season.Episodes.map(async (episode) => {
+              try {
+                const details = await getEpisodeDetails(episode.imdbID);
+                return {
+                  ...episode,
+                  Poster: details.Poster,
+                  imdbRating: details.imdbRating,
+                };
+              } catch {
+                return episode; // Keep the season data if one detail request fails.
+              }
+            }),
+        );
+
+        if (!active) return;
+        setMovie(movie);
+        setEpisodes(episodes);
+        setLoadState('ready');
+      } catch {
+        if (active) setLoadState('error');
+      }
+    }
+
+    void load();
+    return () => { active = false; };
   }, []);
 
   return (
@@ -61,8 +91,8 @@ export default function App() {
             <Text style={styles.eyebrow}>{movie?.Title}</Text>
             <Text style={styles.brand}>{movie?.Year}</Text>
             <Text style={styles.details}>IMDb ID: {movie?.imdbID}</Text>
-            <Text style={styles.details}>Poster: {movie?.Poster}</Text>
-            <Text style={styles.subtitle}>{movie?.Ratings}</Text>
+            <Image source={{ uri: movie?.Poster }} style={styles.poster} />
+            <Text style={styles.subtitle}>{movie?.imdbRating}</Text>
           </View>
         }
         renderItem={({ item }) => <MovieCard episode={item} />}
@@ -86,7 +116,7 @@ export default function App() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#090d16',
+    backgroundColor: '#230e40',
   },
   content: {
     alignItems: 'center',

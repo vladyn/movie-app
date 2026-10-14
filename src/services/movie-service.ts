@@ -19,7 +19,6 @@ export type SeasonResponse = {
     Season: string;
     totalSeasons: string;
     Episodes: Episode[];
-    Response: 'True';
 };
 
 export type MovieResponse = {
@@ -44,34 +43,6 @@ export type MovieResponse = {
     imdbID: string;
     Type: 'series';
     totalSeasons: string;
-    Response: 'True';
-};
-
-export type Movie = {
-    Title: string;
-    Year: string;
-    Rated: string;
-    Released: string;
-    Season: string;
-    Episode: string;
-    Runtime: string;
-    Genre: string;
-    Director: string;
-    Writer: string;
-    Actors: string;
-    Plot: string;
-    Language: string;
-    Country: string;
-    Awards: string;
-    Poster: string;
-    Ratings: { Source: string; Value: string }[];
-    Metascore: string;
-    imdbRating: string;
-    imdbVotes: string;
-    imdbID: string;
-    seriesID: string;
-    Type: 'episode';
-    Response: 'True';
 };
 
 export const searchMovies = async (title: string): Promise<MovieResponse> => {
@@ -90,7 +61,7 @@ export const searchEpisodes = async (title: string): Promise<SeasonResponse> => 
     return await response.json();
 }
 
-export const getEpisodeDetails = async (imdbID: string): Promise<Movie> => {
+export const getEpisodeDetails = async (imdbID: string): Promise<Episode> => {
     const response = await fetch(`${BASE_URL}?i=${imdbID}&apikey=${API_KEY}`);
     if(!response.ok) {
         throw new Error('Failed to fetch episode details');
