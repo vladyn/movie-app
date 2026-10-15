@@ -14,8 +14,7 @@ expo-env.d.ts
 /android/
 
 # Local configuration and signing files
-.env*
-!.env.example
+.env
 *.jks
 *.p8
 *.p12

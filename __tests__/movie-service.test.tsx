@@ -93,9 +93,7 @@ test('searchMovies fetches series details', async () => {
 
   await expect(searchMovies('it crowd')).resolves.toEqual(movie);
   expect(fetchMock).toHaveBeenCalledTimes(1);
-  expect(fetchMock).toHaveBeenCalledWith(expect.stringMatching(
-    /^https:\/\/www\.omdbapi\.com\/\?t=it crowd&apikey=.+$/,
-  ));
+  expect(fetchMock).toHaveBeenCalledWith('https://www.omdbapi.com/?t=it crowd&apikey=test-api-key');
   expect(json).toHaveBeenCalledTimes(1);
 });
 
@@ -113,9 +111,7 @@ test('searchEpisodes fetches the first season', async () => {
 
   await expect(searchEpisodes('it crowd')).resolves.toEqual(season);
   expect(fetchMock).toHaveBeenCalledTimes(1);
-  expect(fetchMock).toHaveBeenCalledWith(expect.stringMatching(
-    /^https:\/\/www\.omdbapi\.com\/\?t=it crowd&season=1&apikey=.+$/,
-  ));
+  expect(fetchMock).toHaveBeenCalledWith('https://www.omdbapi.com/?t=it crowd&season=1&apikey=test-api-key');
   expect(json).toHaveBeenCalledTimes(1);
 });
 
@@ -133,9 +129,7 @@ test('getEpisodeDetails fetches an episode by IMDb ID', async () => {
 
   await expect(getEpisodeDetails('tt0609849')).resolves.toEqual(episode);
   expect(fetchMock).toHaveBeenCalledTimes(1);
-  expect(fetchMock).toHaveBeenCalledWith(expect.stringMatching(
-    /^https:\/\/www\.omdbapi\.com\/\?i=tt0609849&apikey=.+$/,
-  ));
+  expect(fetchMock).toHaveBeenCalledWith('https://www.omdbapi.com/?i=tt0609849&apikey=test-api-key');
   expect(json).toHaveBeenCalledTimes(1);
 });
 

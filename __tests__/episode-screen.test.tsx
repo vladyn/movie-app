@@ -32,7 +32,7 @@ describe('EpisodeScreen', () => {
     expect(screen.getByText('Yesterday\'s Jam')).toBeTruthy();
     expect(screen.getByText('Season 1')).toBeTruthy();
     expect(screen.getByText('Released: 2006-02-03')).toBeTruthy();
-    expect(screen.getByText('IMDb rating: 8.2')).toBeTruthy();
+    expect(screen.getByLabelText('IMDb rating 8.2 out of 10')).toHaveTextContent('★ 8.2');
     expect(screen.getByText('Episode Details:')).toBeTruthy();
     expect(screen.getByText('Episode: 1')).toBeTruthy();
     expect(screen.getByText('Director: Graham Linehan')).toBeTruthy();

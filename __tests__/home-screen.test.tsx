@@ -105,25 +105,28 @@ test('loads and displays episode fields from the season service', async () => {
   expect(screen.getByText('Calamity Jen')).toBeTruthy();
   expect(screen.getAllByText('Season 1')).toHaveLength(2);
   expect(screen.getByText('Released: 2006-02-03')).toBeTruthy();
-  expect(screen.getByText('IMDb rating: 8.2')).toBeTruthy();
+  expect(screen.getAllByText('Genre: Comedy')).toHaveLength(2);
+  expect(screen.getAllByText('Country: United Kingdom')).toHaveLength(2);
   expect(screen.getByTestId('movie-list').props.data).toEqual(episodeDetails);
 
   fireEvent.press(screen.getByRole('button', { name: /Yesterday's Jam/ }));
   expect(mockNavigate).toHaveBeenCalledWith('Episode', { episode: episodeDetails[0] });
 });
 
-test('uses episode details for poster and rating', async () => {
+test('uses episode details for poster, genre, and country', async () => {
   searchMoviesMock.mockResolvedValue(movie);
   searchEpisodesMock.mockResolvedValue(season);
   getEpisodeDetailsMock.mockImplementation(async (imdbID) => ({
     ...episodeDetails.find((episode) => episode.imdbID === imdbID)!,
     Poster: `https://example.com/${imdbID}.jpg`,
-    imdbRating: '9.0',
+    Genre: 'Science Fiction',
+    Country: 'Ireland',
   }));
 
   await render(<HomeScreen />);
 
-  await waitFor(() => expect(screen.getAllByText('IMDb rating: 9.0')).toHaveLength(2));
+  await waitFor(() => expect(screen.getAllByText('Genre: Science Fiction')).toHaveLength(2));
+  expect(screen.getAllByText('Country: Ireland')).toHaveLength(2);
   expect(screen.getByLabelText('Yesterday\'s Jam poster').props.source).toEqual({
     uri: 'https://example.com/tt0609857.jpg',
   });
@@ -140,7 +143,7 @@ test('keeps season data when one episode detail request fails', async () => {
   await render(<HomeScreen />);
 
   await waitFor(() => expect(screen.getByText('Yesterday\'s Jam')).toBeTruthy());
-  expect(screen.getByText('IMDb rating: 8.2')).toBeTruthy();
+  expect(screen.getByText('Genre: Comedy')).toBeTruthy();
   expect(screen.getByTestId('movie-list').props.data).toEqual([
     { ...episodes[0], Season: '1' },
     episodeDetails[1],

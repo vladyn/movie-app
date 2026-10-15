@@ -1,5 +1,5 @@
-const API_KEY = 'd425abd7';
-const BASE_URL = 'https://www.omdbapi.com/';
+const API_KEY = process.env.EXPO_PUBLIC_OMDB_API_KEY;
+const BASE_URL = process.env.EXPO_PUBLIC_OMDB_BASE_URL;
 
 export type SeasonResponse = {
     Title: string;
@@ -45,7 +45,7 @@ export type SeriesResponse = TitleDetails & {
 };
 
 export type Episode = Pick<MovieResponse, 'Title' | 'Released' | 'Episode' | 'imdbRating' | 'imdbID'> &
-    Partial<Pick<MovieResponse, 'Poster' | 'Season' | 'Director' | 'Writer' | 'Actors' | 'Plot'>>;
+    Partial<Pick<MovieResponse, 'Poster' | 'Season' | 'Director' | 'Country' | 'Genre' | 'Writer' | 'Actors' | 'Plot'>>;
 
 export const searchMovies = async (title: string): Promise<SeriesResponse> => {
     const response = await fetch(`${BASE_URL}?t=${title}&apikey=${API_KEY}`);
